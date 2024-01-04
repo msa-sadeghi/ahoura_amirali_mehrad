@@ -4,8 +4,9 @@ from world import World
 from levels.level1 import world_data
 
 player_group = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
 
-game_world = World(world_data, player_group)
+game_world = World(world_data, player_group,enemy_group)
 running = True
 while running:
     for event in pygame.event.get():
@@ -15,5 +16,7 @@ while running:
     game_world.draw_bg(SCREEN)
     player_group.update(game_world.tile_map)
     player_group.draw(SCREEN)
+    enemy_group.draw(SCREEN)
+    enemy_group.update()
     pygame.display.update()
     CLOCK.tick(FPS)
