@@ -27,6 +27,7 @@ class Player(Sprite):
 
         self.frame_index = 0
         self.image = self.right_idle_images[self.frame_index]
+        self.dead_image = pygame.image.load("assets/img/ghost.png")
         self.rect = self.image.get_rect(topleft=(x,y))
         self.vel_y = 0
         self.speed = 5
@@ -34,53 +35,60 @@ class Player(Sprite):
         self.counter = 0
         self.idle = True
 
-    def update(self,tile_map):
+    def update(self,tile_map, enemy_group, game_status):
         if self.direction == 1:
             rect = pygame.Rect(self.rect.x + 42, self.rect.y + 8, self.image.get_width()-60, self.image.get_height()-17)
         if self.direction == -1:
             rect = pygame.Rect(self.rect.x + 20, self.rect.y + 8, self.image.get_width()-60, self.image.get_height()-17)
         pygame.draw.rect(SCREEN, (25,140,60), rect, 5)
-        # pygame.draw.rect(SCREEN, (255,0,0), self.rect, 5)
+        pygame.draw.rect(SCREEN, (255,0,0), self.rect, 5)
         dx = 0
         dy = 0
+        if game_status == "playing":
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                self.vel_y = -10
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_SPACE]:
-            self.vel_y = -10
+            if keys[pygame.K_LEFT]:
+                self.idle = False
+                self.direction = -1
+                dx -= self.speed
+            if keys[pygame.K_RIGHT]:
+                self.idle = False
+                self.direction = 1
+                dx += self.speed
 
-        if keys[pygame.K_LEFT]:
-            self.idle = False
-            self.direction = -1
-            dx -= self.speed
-        if keys[pygame.K_RIGHT]:
-            self.idle = False
-            self.direction = 1
-            dx += self.speed
+            if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
+                self.idle = True
 
-        if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
-            self.idle = True
+            self.vel_y += 1
+            dy += self.vel_y
 
-        self.vel_y += 1
-        dy += self.vel_y
+            for tile in tile_map:
+                if tile[1].colliderect(rect.x + dx, rect.y, self.image.get_width()-60, self.image.get_height()-17):
+                    dx = 0
+                if tile[1].colliderect(rect.x, rect.y + dy, self.image.get_width()-60, self.image.get_height()-17):
+                    if self.vel_y >= 0:
+                        self.vel_y = 0
+                        dy = tile[1].top - rect.bottom
+                    else:
+                        dy = tile[1].bottom - rect.top
 
-        for tile in tile_map:
-            if tile[1].colliderect(rect.x + dx, rect.y, self.image.get_width()-60, self.image.get_height()-17):
-                dx = 0
-            if tile[1].colliderect(rect.x, rect.y + dy, self.image.get_width()-60, self.image.get_height()-17):
-                if self.vel_y >= 0:
-                    self.vel_y = 0
-                    dy = tile[1].top - rect.bottom
-                else:
-                    dy = tile[1].bottom - rect.top
+            self.animation()
 
+            self.rect.x += dx
+            self.rect.y += dy
 
-        self.rect.x += dx
-        self.rect.y += dy
-
+            if pygame.sprite.spritecollide(self, enemy_group, False):
+                game_status = "game_over"
+        elif game_status == "game_over":
+            self.image = self.dead_image
+        print(game_status)
+        return game_status
+            
         # if self.rect.bottom >= SCREEN_HEIGHT:
         #     self.rect.bottom = SCREEN_HEIGHT
 
-        self.animation()
 
         
     def animation(self):

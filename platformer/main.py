@@ -7,6 +7,7 @@ player_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 
 game_world = World(world_data, player_group,enemy_group)
+game_status = "playing"
 running = True
 while running:
     for event in pygame.event.get():
@@ -14,9 +15,15 @@ while running:
             if event.key == K_ESCAPE:
                 running = False
     game_world.draw_bg(SCREEN)
-    player_group.update(game_world.tile_map)
+    game_status = player_group.update(game_world.tile_map, enemy_group,game_status)
+    # player_group.update(game_world.tile_map, enemy_group,game_status)
+    print(game_status,"kkkkkkkkkkkkkkkkkkkkkkkkk")
     player_group.draw(SCREEN)
     enemy_group.draw(SCREEN)
     enemy_group.update()
     pygame.display.update()
     CLOCK.tick(FPS)
+
+
+
+# TODO Lava to the game
