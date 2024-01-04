@@ -111,3 +111,7 @@ class Player(Sprite):
                 self.image = self.left_idle_images[self.frame_index]
             else:
                 self.image = self.left_images[self.frame_index]
+
+
+    def draw(self):
+        SCREEN.blit(self.image, self.rect)
